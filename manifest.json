@@ -1,0 +1,20 @@
+{
+  "id": "./",
+  "name": "Vessel of Honour Attendance",
+  "short_name": "VOH Attendance",
+  "description": "Student attendance register for Vessel of Honour, Kumasi Abijan Nkwanta.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f4f7f5",
+  "theme_color": "#123b2b",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#123b2b">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Vessel of Honour | Attendance</title>
+<link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+<div class="app">
+<header class="topbar">
+  <div class="brand"><div class="crest">🎓</div><div><h1>Vessel of Honour</h1><p>Student Attendance Management · Kumasi Abijan Nkwanta</p></div></div>
+  <div class="date-chip" id="todayChip">📅 Today</div>
+</header>
+<main class="shell">
+  <nav class="nav no-print" aria-label="Main navigation">
+    <button class="active" data-page="dashboard">▦ Dashboard</button>
+    <button data-page="attendance">✓ Take Attendance</button>
+    <button data-page="students">♙ Learners</button>
+    <button data-page="reports">▤ Reports</button>
+    <button data-page="settings">⚙ Settings</button>
+  </nav>
+
+  <section id="page-dashboard" class="page">
+    <div class="page-head"><div><h2>School overview</h2><p>Welcome back. Here's your attendance snapshot.</p></div><button class="btn btn-primary no-print" data-goto="attendance">＋ Take attendance</button></div>
+    <div class="stats">
+      <div class="stat"><div class="stat-top"><span>Total learners</span><span class="stat-icon">♙</span></div><strong id="statTotal">0</strong><small>Registered in school</small></div>
+      <div class="stat"><div class="stat-top"><span>Present today</span><span class="stat-icon">✓</span></div><strong id="statPresent">0</strong><small id="presentSub">Marked present</small></div>
+      <div class="stat"><div class="stat-top"><span>Absent today</span><span class="stat-icon">↗</span></div><strong id="statAbsent">0</strong><small>Marked absent</small></div>
+      <div class="stat"><div class="stat-top"><span>Late today</span><span class="stat-icon">◷</span></div><strong id="statLate">0</strong><small>Arrived late</small></div>
+    </div>
+    <div class="layout">
+      <div class="panel"><div class="panel-head"><div><h3>Today's register</h3><p id="dashDate">Attendance overview</p></div><button class="btn btn-light no-print" data-goto="attendance">Open register →</button></div>
+        <div id="dashProgress"></div><div style="margin-top:17px" id="dashSummary"></div>
+      </div>
+      <div class="panel"><div class="panel-head"><div><h3>Quick actions</h3><p>Manage your school register</p></div></div>
+        <div class="quick-row"><div><div class="quick-label">Register a learner</div><span class="subtext">Add a new learner to your school</span></div><button class="btn btn-light no-print" data-goto="students">Add +</button></div>
+        <div class="quick-row"><div><div class="quick-label">Take attendance</div><span class="subtext">Mark today's class register</span></div><button class="btn btn-light no-print" data-goto="attendance">Open →</button></div>
+        <div class="quick-row"><div><div class="quick-label">Download records</div><span class="subtext">Export a CSV spreadsheet</span></div><button class="btn btn-light no-print" id="quickExport">Export ↓</button></div>
+        <div class="notice" style="margin-top:16px;margin-bottom:0">🔒 Records are stored in this browser on this device. Export a backup regularly.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="page-attendance" class="page hidden">
+    <div class="page-head"><div><h2>Take attendance</h2><p>Choose a date and class, then mark each learner.</p></div><button class="btn btn-outline no-print" id="printAttendance">⎙ Print</button></div>
+    <div class="notice">Select <b>Present</b>, <b>Absent</b>, or <b>Late</b> for each learner. Attendance is saved automatically on this device.</div>
+    <div class="panel">
+      <div class="toolbar no-print">
+        <div class="field"><label for="attDate">Attendance date</label><input type="date" id="attDate"></div>
+        <div class="field"><label for="attClass">Class</label><select id="attClass"><option value="all">All classes</option></select></div>
+        <div class="field" style="flex:1"><label for="attSearch">Search learner</label><input id="attSearch" placeholder="Name or student ID"></div>
+      </div>
+      <div class="panel-head"><div><h3 id="registerTitle">Class register</h3><p id="registerSub">0 learners</p></div><div class="no-print" style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-light" id="markAllPresent">All present</button><button class="btn btn-light" id="clearMarks">Clear marks</button></div></div>
+      <div class="table-wrap"><table><thead><tr><th>Learner</th><th>Class</th><th>Attendance status</th></tr></thead><tbody id="attendanceRows"></tbody></table><div id="attendanceEmpty" class="empty hidden"><strong>No learners found</strong>Register learners first or change your filters.</div></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:15px"><span class="muted" style="font-size:12px" id="saveStatus">Changes save automatically</span><button class="btn btn-primary no-print" id="finishAttendance">✓ Finish register</button></div>
+    </div>
+  </section>
+
+  <section id="page-students" class="page hidden">
+    <div class="page-head"><div><h2>Learner directory</h2><p>Add, find, and manage registered learners.</p></div><button class="btn btn-primary no-print" id="showStudentForm">＋ Add learner</button></div>
+    <div class="panel hidden" id="studentFormPanel" style="margin-bottom:18px">
+      <div class="panel-head"><div><h3 id="studentFormTitle">Register a learner</h3><p>Fields marked * are required.</p></div><button class="btn btn-light no-print" id="closeStudentForm">✕ Close</button></div>
+      <form id="studentForm">
+        <input type="hidden" id="editStudentId">
+        <div class="form-grid">
+          <div class="field"><label for="studentId">Student ID *</label><input id="studentId" required maxlength="30" placeholder="e.g. VOH-001"></div>
+          <div class="field"><label for="studentName">Full name *</label><input id="studentName" required maxlength="100" placeholder="Learner's full name"></div>
+          <div class="field"><label for="studentClass">Class *</label><input id="studentClass" required maxlength="50" list="classSuggestions" placeholder="e.g. Basic 4"><datalist id="classSuggestions"></datalist></div>
+          <div class="field"><label for="studentGender">Gender (optional)</label><select id="studentGender"><option value="">Prefer not to say</option><option>Female</option><option>Male</option><option>Other</option></select></div>
+          <div class="field full"><label for="studentGuardian">Parent/guardian contact (optional)</label><input id="studentGuardian" maxlength="50" placeholder="Phone number"></div>
+        </div>
+        <div class="form-actions"><button class="btn btn-primary" type="submit" id="saveStudentBtn">Save learner</button><button class="btn btn-outline" type="button" id="cancelStudentForm">Cancel</button></div>
+      </form>
+    </div>
+    <div class="panel"><div class="toolbar"><input id="studentSearch" placeholder="Search by name, ID, or class"><select id="studentClassFilter"><option value="all">All classes</option></select><button class="btn btn-outline no-print" id="exportStudents">Export CSV ↓</button></div>
+      <div class="table-wrap"><table><thead><tr><th>Learner</th><th>Class</th><th>Gender</th><th>Actions</th></tr></thead><tbody id="studentRows"></tbody></table><div id="studentEmpty" class="empty hidden"><strong>No learners registered yet</strong>Choose “Add learner” to create your first student record.</div></div>
+    </div>
+  </section>
+
+  <section id="page-reports" class="page hidden">
+    <div class="page-head"><div><h2>Attendance reports</h2><p>Review attendance records for a selected period.</p></div><div class="no-print" style="display:flex;gap:8px"><button class="btn btn-outline" id="printReport">⎙ Print</button><button class="btn btn-primary" id="exportReport">Export CSV ↓</button></div></div>
+    <div class="panel" style="margin-bottom:18px"><div class="toolbar no-print"><div class="field"><label for="reportFrom">From date</label><input type="date" id="reportFrom"></div><div class="field"><label for="reportTo">To date</label><input type="date" id="reportTo"></div><div class="field"><label for="reportClass">Class</label><select id="reportClass"><option value="all">All classes</option></select></div><button class="btn btn-light" id="runReport" style="align-self:end">Update report</button></div>
+      <div class="report-grid"><div class="report-mini"><span>Attendance marks</span><strong id="repMarks">0</strong></div><div class="report-mini"><span>Present</span><strong id="repPresent">0</strong></div><div class="report-mini"><span>Attendance rate*</span><strong id="repRate">—</strong></div></div>
+      <p class="muted" style="font-size:11px;margin:0 0 15px">*Attendance rate = present marks divided by all marked attendance statuses (present, absent, and late). Unmarked learners are excluded.</p>
+      <div class="table-wrap"><table><thead><tr><th>Learner</th><th>Class</th><th>Present</th><th>Absent</th><th>Late</th><th>Marked days</th><th>Rate</th></tr></thead><tbody id="reportRows"></tbody></table><div id="reportEmpty" class="empty hidden"><strong>No report data for this period</strong>Take attendance and try again.</div></div>
+    </div>
+  </section>
+
+  <section id="page-settings" class="page hidden">
+    <div class="page-head"><div><h2>Settings & data</h2><p>Manage your school records and backups.</p></div></div>
+    <div class="layout">
+      <div class="panel"><div class="panel-head"><div><h3>School information</h3><p>Shown in the app header.</p></div></div><div class="field"><label for="schoolNameSetting">School name</label><input id="schoolNameSetting" value="Vessel of Honour"></div><div class="field" style="margin-top:13px"><label for="schoolLocationSetting">School location</label><input id="schoolLocationSetting" value="Kumasi Abijan Nkwanta"></div><div class="form-actions"><button class="btn btn-primary" id="saveSettings">Save school details</button></div></div>
+      <div class="panel"><div class="panel-head"><div><h3>Backup & restore</h3><p>Protect your attendance records.</p></div></div><p class="settings-note">Download a CSV file for spreadsheets, or create a complete JSON backup containing learners and attendance history. Keep backups in a safe place.</p><div class="form-actions"><button class="btn btn-primary" id="backupJson">Download full backup</button><button class="btn btn-outline" id="restoreJsonBtn">Restore backup</button><input type="file" id="restoreJsonFile" accept=".json,application/json" class="hidden"></div><div class="danger-zone"><h3>Danger zone</h3><p class="settings-note">Resetting deletes all learners and attendance records from this browser. Export a backup first.</p><button class="btn btn-danger" id="resetApp">Delete all local records</button></div></div>
+    </div>
+    <div class="panel" style="margin-top:18px"><h3 style="margin-top:0">About this version</h3><p class="settings-note">This is a browser-based starter app. It works on Android and desktop browsers and stores records locally on the device. It does not yet have online login, shared multi-device syncing, automated SMS, or biometric attendance. Anyone with access to this browser profile may be able to view the records, so use a protected device and avoid storing unnecessary sensitive information.</p></div>
+  </section>
+  <div class="footer">Vessel of Honour · Attendance Management · Keep your data backed up</div>
+</main>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="app.js" defer></script>
+
+</body>
+</html>
